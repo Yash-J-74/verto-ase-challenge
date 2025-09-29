@@ -10,5 +10,6 @@ import java.util.List;
 public class SubmitResponseDto {
     private int score;
     private int total;
+    private Long attemptId;
     private List<AnswerResultDto> results;
 }

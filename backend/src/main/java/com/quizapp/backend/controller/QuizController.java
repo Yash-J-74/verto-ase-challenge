@@ -33,4 +33,11 @@ public class QuizController {
             ) {
         return ResponseEntity.ok(attemptService.submitAnswer(quizId, request));
     }
+
+    @GetMapping("/{quizId}/attempt/{attemptId}")
+    public ResponseEntity<SubmitResponseDto> getAttemptResults(
+            @PathVariable Long quizId,
+            @PathVariable Long attemptId) {
+        return ResponseEntity.ok(attemptService.getAttemptResults(quizId, attemptId));
+    }
 }

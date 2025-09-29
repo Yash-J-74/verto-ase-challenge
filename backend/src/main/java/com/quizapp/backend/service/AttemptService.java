@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class AttemptService {
@@ -63,10 +64,18 @@ public class AttemptService {
             attemptAnswer.setCorrect(correct);
             attemptAnswerRepo.save(attemptAnswer);
 
+            String correctOptionText = question.getOptions()
+                    .stream()
+                    .filter(Option::isCorrect)
+                    .findFirst()
+                    .map(Option::getText)
+                    .orElse("");
+
             results.add(new AnswerResultDto(
                     question.getId(),
                     question.getText(),
                     chosenoption.getText(),
+                    correctOptionText,
                     correct
             ));
         }
@@ -75,6 +84,52 @@ public class AttemptService {
         attempt.setScore(score);
         attemptRepo.save(attempt);
 
-        return new SubmitResponseDto(score, request.getAnswers().size(), results);
+        return new SubmitResponseDto(score, request.getAnswers().size(), attempt.getId(), results);
     }
+
+    @Transactional(readOnly = true)
+    public SubmitResponseDto getAttemptResults(Long quizId, Long attemptId) {
+        Attempt attempt = attemptRepo.findById(attemptId)
+                .orElseThrow(() -> new RuntimeException("Attempt not found"));
+
+        if (!Objects.equals(attempt.getQuiz().getId(), quizId)) {
+            throw new RuntimeException("Attempt does not belong to this quiz");
+        }
+
+        List<AnswerResultDto> results = new ArrayList<>();
+        int score = 0;
+
+        for (AttemptAnswer answer : attempt.getAnswers()) {
+            boolean correct = answer.isCorrect();
+            if (correct) score++;
+
+            results.add(new AnswerResultDto(
+                    answer.getQuestion().getId(),
+                    answer.getQuestion().getText(),
+                    answer.getOption().getText(),
+                    answer.getQuestion().getOptions()
+                            .stream()
+                            .filter(Option::isCorrect)
+                            .findFirst()
+                            .map(Option::getText)
+                            .orElse(""),
+                    correct
+            ));
+        }
+
+        // store score in attempt if not already stored
+        if (attempt.getScore() == null) {
+            attempt.setScore(score);
+            attempt.setCompletedAt(LocalDateTime.now());
+            attemptRepo.save(attempt);
+        }
+
+        return new SubmitResponseDto(
+                score,
+                attempt.getQuiz().getQuestions().size(),
+                attempt.getId(),
+                results
+        );
+    }
+
 }
