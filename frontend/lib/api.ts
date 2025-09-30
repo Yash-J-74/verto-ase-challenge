@@ -1,4 +1,4 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+export const API_URL = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8080";
 
 export async function getQuestions(quizId: number) {
   const res = await fetch(`${API_URL}/api/quiz/${quizId}/questions`);

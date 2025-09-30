@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: quiz-backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/quiz.db:/app/quiz.db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlite:/app/quiz.db
+    depends_on:
+      - frontend   # Frontend up first
+
+  frontend:
+    build: ./frontend
+    container_name: quiz-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE=http://localhost:8080
