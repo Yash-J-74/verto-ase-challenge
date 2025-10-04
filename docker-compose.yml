@@ -7,7 +7,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./backend/quiz.db:/app/quiz.db
+      - quiz_data:/app/data
     environment:
       - SPRING_DATASOURCE_URL=jdbc:sqlite:/app/quiz.db
     healthcheck:
@@ -28,3 +28,6 @@ services:
       backend:
         condition: service_healthy
     restart: always
+
+volumes:
+  quiz_data:
