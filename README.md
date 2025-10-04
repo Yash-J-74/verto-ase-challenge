@@ -29,6 +29,8 @@ cd verto-ase-challenge
 Make sure you have Docker and Docker Compose installed.
 
 ``` bash
+# Will usually take around a minute to start the first time depending on you internet connection
+
 .\start.ps1    # Windows
 ./start.sh     # Linux/Mac
 ```
@@ -71,6 +73,53 @@ verto-ase-challenge/
   * AttemptAnswer → stores answers chosen in an attempt
 
 On startup, a sample quiz is inserted with multiple questions via DataInitializer.
+
+```mermaid
+
+erDiagram
+    QUIZ {
+        long id PK
+        string title
+        string description
+    }
+
+    QUESTION {
+        long id PK
+        long quiz_id FK
+        string text
+    }
+
+    OPTION {
+        long id PK
+        long question_id FK
+        string text
+        boolean isCorrect
+    }
+
+    ATTEMPT {
+        long id PK
+        long quiz_id FK
+        datetime startedAt
+        datetime completedAt
+        int score
+    }
+
+    ATTEMPT_ANSWER {
+        long id PK
+        long attempt_id FK
+        long question_id FK
+        long option_id FK
+        boolean isCorrect
+    }
+
+    QUIZ ||--|{ QUESTION : "has"
+    QUESTION ||--|{ OPTION : "has"
+    QUIZ ||--|{ ATTEMPT : "has"
+    ATTEMPT ||--|{ ATTEMPT_ANSWER : "contains"
+    ATTEMPT_ANSWER }|--|| QUESTION : "answers"
+    ATTEMPT_ANSWER }|--|| OPTION : "chooses"
+
+```
 
 ## Features Implemented
 
