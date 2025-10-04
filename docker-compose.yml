@@ -10,8 +10,12 @@ services:
       - ./backend/quiz.db:/app/quiz.db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:sqlite:/app/quiz.db
-    depends_on:
-      - frontend   # Frontend up first
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
 
   frontend:
     build: ./frontend
@@ -19,4 +23,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_BASE=http://localhost:8080
+      - NEXT_PUBLIC_API_BASE=http://backend:8080
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: always

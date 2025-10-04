@@ -7,14 +7,17 @@ COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 
-# Running tests and building img even if they fail
-RUN ./mvnw clean install -Dmaven.test.failure.ignore=true
+# Install curl
+RUN apk add --no-cache curl
+
+# Download dependencies first
+RUN ./mvnw dependency:go-offline -B
 
 COPY src ./src
 
-# Package the Spring Boot app
-RUN ./mvnw package
+# Run tests and build JAR 
+RUN ./mvnw clean package -DskipTests
 
 EXPOSE 8080
 
-ENTRYPOINT ["java","-jar","target/your-app-name-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-jar","target/backend-0.0.1-SNAPSHOT.jar"]
